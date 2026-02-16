@@ -3,6 +3,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    ports: -8000:8000
     environment:
       - PORT=8000
       - BACKEND_API_URL=${BACKEND_API_URL:-https://api.tierin.f5.si}
