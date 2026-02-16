@@ -7,8 +7,8 @@ services:
       - "${FRONTEND_PORT:-8000}:8000"
     environment:
       - PORT=8000
-      - BACKEND_API_URL=${BACKEND_API_URL:-http://host.docker.internal:3000}
-      - FILE_SERVER_URL=${FILE_SERVER_URL:-http://host.docker.internal:8080}
+      - BACKEND_API_URL=${BACKEND_API_URL:-https://api.tierin.f5.si}
+      - FILE_SERVER_URL=${FILE_SERVER_URL:-https://storage.tierin.f5.si}
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "wget", "-q", "--spider", "http://localhost:8000/health" ]
