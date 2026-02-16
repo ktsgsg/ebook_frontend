@@ -1,8 +1,8 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { BACKEND_API_URL, FILE_SERVER_URL, PORT } from './config.js'
-import { renderPage, renderBookDetail, renderErrorPage } from './templates.js'
-import type { SearchResponse, BookDetail } from './types.js'
+import { renderPage, renderBookDetail, renderErrorPage, renderAdvancedSearchPage } from './templates.js'
+import type { SearchResponse, BookDetail, AdvancedSearchParams } from './types.js'
 
 const app = new Hono()
 
@@ -28,12 +28,97 @@ app.get('/', async (c) => {
     if (!response.ok) {
       throw new Error(`検索APIエラー: ${response.status}`)
     }
-
     const results: SearchResponse = await response.json()
     return c.html(renderPage(query, results, null, page, limit))
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : '検索中にエラーが発生しました'
     return c.html(renderPage(query, null, errorMessage, page, limit))
+  }
+})
+
+// 詳細検索ページ
+app.get('/advanced-search', async (c) => {
+  const limit = parseInt(c.req.query('limit') || '20', 10)
+  const page = parseInt(c.req.query('page') || '1', 10)
+  const offset = (page - 1) * limit
+
+  // 検索パラメータを取得
+  const params: AdvancedSearchParams = {
+    keyword: c.req.query('keyword') || '',
+    title: c.req.query('title') || '',
+    authors: c.req.query('authors') || '',
+    publisher: c.req.query('publisher') || '',
+    genre: c.req.query('genre') || '',
+    language: c.req.query('language') || '',
+    publication_date_from: c.req.query('publication_date_from') || '',
+    publication_date_to: c.req.query('publication_date_to') || '',
+    ndc_class: c.req.query('ndc_class') || '',
+    subject: c.req.query('subject') || '',
+  }
+
+  // 検索条件が何もなければフォームのみ表示
+  const hasSearchParams = Object.values(params).some(v => v && v.trim() !== '')
+  if (!hasSearchParams) {
+    return c.html(renderAdvancedSearchPage())
+  }
+
+  try {
+    // テキスト検索用のクエリを構築（Meilisearchはフィルターで部分一致検索をサポートしていない）
+    const queryParts: string[] = []
+    if (params.keyword) queryParts.push(params.keyword)
+    if (params.title) queryParts.push(params.title)
+    if (params.authors) queryParts.push(params.authors)
+    if (params.publisher) queryParts.push(params.publisher)
+    if (params.genre) queryParts.push(params.genre)
+    if (params.ndc_class) queryParts.push(params.ndc_class)
+    if (params.subject) queryParts.push(params.subject)
+
+    // フィルター条件を構築（完全一致や範囲検索のみ）
+    const filters: string[] = []
+    if (params.language) {
+      filters.push(`language = "${params.language}"`)
+    }
+    if (params.publication_date_from) {
+      filters.push(`publication_date >= ${params.publication_date_from}`)
+    }
+    if (params.publication_date_to) {
+      filters.push(`publication_date <= ${params.publication_date_to}`)
+    }
+
+    // POST APIを使用して検索
+    const searchUrl = new URL('/search', BACKEND_API_URL)
+    const requestBody: {
+      query: string
+      limit: number
+      offset: number
+      filter?: string
+    } = {
+      query: queryParts.join(' '),
+      limit,
+      offset,
+    }
+
+    if (filters.length > 0) {
+      requestBody.filter = filters.join(' AND ')
+    }
+
+    const response = await fetch(searchUrl.toString(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    })
+    console.log(await response.text())
+    if (!response.ok) {
+      throw new Error(`検索APIエラー: ${response.status}`)
+    }
+
+    const results: SearchResponse = await response.json()
+    return c.html(renderAdvancedSearchPage(params, results, null, page, limit))
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : '検索中にエラーが発生しました'
+    return c.html(renderAdvancedSearchPage(params, null, errorMessage, page, limit))
   }
 })
 

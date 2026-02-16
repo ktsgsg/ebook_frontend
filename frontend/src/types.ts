@@ -7,6 +7,10 @@ export interface SearchHit {
    publisher?: string
    publication_date?: string
    description?: string
+   genre?: string
+   language?: string
+   ndc_class?: string
+   subject?: string
    [key: string]: unknown
 }
 
@@ -17,6 +21,20 @@ export interface SearchResponse {
    limit: number
    offset: number
    estimatedTotalHits: number
+}
+
+// 詳細検索パラメータの型定義
+export interface AdvancedSearchParams {
+   keyword?: string
+   title?: string
+   authors?: string
+   publisher?: string
+   genre?: string
+   language?: string
+   publication_date_from?: string
+   publication_date_to?: string
+   ndc_class?: string
+   subject?: string
 }
 
 // 目次の型定義
