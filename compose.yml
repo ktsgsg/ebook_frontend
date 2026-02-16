@@ -3,8 +3,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    ports:
-      - "${FRONTEND_PORT:-8000}:8000"
     environment:
       - PORT=8000
       - BACKEND_API_URL=${BACKEND_API_URL:-https://api.tierin.f5.si}
@@ -16,3 +14,13 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    restart: unless-stopped
+    depends_on:
+      frontend:
+        condition: service_healthy
