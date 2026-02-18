@@ -14,7 +14,8 @@ export const siteConfig = {
   emptyResultsMessage: '検索結果がありません',
   noTitleText: 'タイトルなし',
   noImageText: 'No Image',
-  pdfButtonText: 'PDFを開く',
+  pdfDownloadButtonText: 'PDFをダウンロード',
+  viewerButtonText: 'ビューアで読む',
   backToSearchText: '← 検索に戻る',
   descriptionLabel: '概要',
   tocLabel: '目次',
@@ -54,6 +55,7 @@ export const renderPage = (
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/ico.svg">
   <title>${siteConfig.title}</title>
   <style>${styles}</style>
 </head>
@@ -316,6 +318,7 @@ export const renderBookDetail = (
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/ico.svg">
   <title>${book.title} - ${siteConfig.title}</title>
   <style>${styles}</style>
 </head>
@@ -384,10 +387,15 @@ export const renderBookDetail = (
           <a
             href="${FILE_SERVER_URL}/pdf/${book.content_id}.pdf"
             class="pdf-link"
-            target="_blank"
-            rel="noopener noreferrer"
+            download
           >
-            ${siteConfig.pdfButtonText}
+            ${siteConfig.pdfDownloadButtonText}
+          </a>
+          <a
+            href="/book/view?id=${book.content_id}"
+            class="pdf-link"
+          >
+            ${siteConfig.viewerButtonText}
           </a>
         </div>
       </div>
@@ -447,6 +455,7 @@ export const renderAdvancedSearchPage = (
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/ico.svg">
   <title>${siteConfig.advancedSearchText} - ${siteConfig.title}</title>
   <style>${styles}</style>
 </head>
@@ -800,6 +809,7 @@ export const renderErrorPage = (
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/ico.svg">
   <title>${title} - ${siteConfig.title}</title>
   <style>${styles}</style>
 </head>

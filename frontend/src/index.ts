@@ -1,10 +1,17 @@
 import { serve } from '@hono/node-server'
+import { serveStatic } from '@hono/node-server/serve-static'
 import { Hono } from 'hono'
 import { BACKEND_API_URL, FILE_SERVER_URL, PORT } from './config.js'
 import { renderPage, renderBookDetail, renderErrorPage, renderAdvancedSearchPage } from './templates.js'
 import type { SearchResponse, BookDetail, AdvancedSearchParams } from './types.js'
-
+import * as fs from "node:fs/promises";
 const app = new Hono()
+
+// faviconの提供
+app.get('/ico.svg', serveStatic({ path: './ico.svg' }))
+
+// assetsフォルダへの直接アクセス用
+app.use('/assets/*', serveStatic({ root: './static' }))
 
 // メインページ（検索フォーム + 結果表示）
 app.get('/', async (c) => {
@@ -120,6 +127,11 @@ app.get('/advanced-search', async (c) => {
     const errorMessage = error instanceof Error ? error.message : '検索中にエラーが発生しました'
     return c.html(renderAdvancedSearchPage(params, null, errorMessage, page, limit))
   }
+})
+
+app.get('/book/view', async (c) => {
+  const file = await fs.readFile("static/index.html")
+  return c.html(file.toString())
 })
 
 // 本の詳細ページ
