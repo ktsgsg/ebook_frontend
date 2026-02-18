@@ -29,6 +29,7 @@ RUN npm ci --omit=dev
 
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
+COPY static/ ./static/
 
 # Expose port
 EXPOSE 8000
