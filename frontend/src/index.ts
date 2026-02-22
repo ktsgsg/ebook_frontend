@@ -140,7 +140,7 @@ app.get('/book/:id', async (c) => {
 
   try {
     // ファイルサーバーからメタデータを取得
-    const metadataUrl = `${FILE_SERVER_URL}/${id}.json`
+    const metadataUrl = `${FILE_SERVER_URL}/metadata/${id}.json`
 
     const response = await fetch(metadataUrl)
 
